@@ -1,0 +1,26 @@
+name: music
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10.6
+  - pip
+  - cpuonly
+  - pytorch
+  - torchvision
+  - pandas
+  - pip:
+    - pytorch-lightning
+    - tensorboard
+    - tqdm
+    - pillow
+    - notebook
+    - matplotlib
+    - pyprojroot
+    - scikit-learn
+    - opencv-python
+    - eyeD3
+    - librosa
+    - tables
+    
