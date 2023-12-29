@@ -17,7 +17,6 @@ Creates an AI model using ResNet that will be able to detect various moods of so
 |:----------------:|:---------------:|:----------------:|
 |  **Low Valence** |       Sad       |       Calm       |
 | **High Valence** |      Happy      |  Tense/Energetic |
-|                  |                 |                  |
 
 </div>
 
