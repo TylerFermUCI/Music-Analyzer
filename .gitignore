@@ -1,3 +1,7 @@
+# Directories
 data
 models
 notebooks
+
+# Misc.
+__pycache__/
