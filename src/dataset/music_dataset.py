@@ -39,9 +39,6 @@ class MusicDataset(torch.utils.data.Dataset):
 
         # Remove exluded values.
         for num in exclude: self.df = self.df[self.df.song_id != num]
-        
-        # One-hot encode the mood for classification.
-        self.df = pd.get_dummies(self.df, columns=["mood"])
     
 
     def print_df(self) -> None:
@@ -61,35 +58,23 @@ class MusicDataset(torch.utils.data.Dataset):
         return len(self.df)
 
 
-    def __getitem__(self, idx) -> (torch.Tensor, torch.Tensor):
+    def __getitem__(self, idx) -> (torch.Tensor, str):
         """
-        Fetches the image and corresponding one-hot encoded label for a given index.
+        Fetches the image and corresponding label for a given index.
 
         Args:
             idx (int): index of the image (spectogram) to fetch
 
-        Return value: torch.Tensor of image and torch.Tensor of one-hot encoded label.
+        Return value: torch.Tensor of image str of mood type.
         """
         # Get the spectogram at the given index (idx).
         row = self.df.iloc[idx]
         img_fname = row["song_id"]
         img_file_path = os.path.join(self.data_dir, f"{img_fname}.png")
         img = cv2.imread(img_file_path, cv2.IMREAD_ANYDEPTH)
-
-        # Fetch one hot encoded labels for all classes of mood type as a Series.
-        mood_type_tensor = row[['mood_calm', 'mood_happy', 'mood_sad', 'mood_tense']]
-
-        # Convert Series to numpy array.
-        mood_type_tensor = mood_type_tensor.to_numpy().astype(np.bool_)
         
-        # Convert One Hot Encoded labels to tensor.
-        mood_type_tensor = torch.from_numpy(mood_type_tensor)
-        
-        # Convert tensor data type to Float.
-        mood_type_tensor = mood_type_tensor.type(torch.FloatTensor)
-        
-        # Return the image and associated one-hot encoded label.
-        return torch.from_numpy(img), mood_type_tensor
+        # Return the image and associated mood type label.
+        return torch.from_numpy(img), row["mood"]
 
 
 if __name__ == "__main__":
@@ -97,7 +82,6 @@ if __name__ == "__main__":
     csv_path = "data/mood.csv"
     data_dir = "data/spectograms"
 
-    # Testing with BPSMouseDataset from tests.
     dataset = MusicDataset(csv_file_path=csv_path, data_dir=data_dir)
 
     print(dataset.__len__())
