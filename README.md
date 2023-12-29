@@ -32,7 +32,7 @@ Creates an AI model using ResNet that will be able to detect various moods of so
 
 ## Data:
 
-The audio files, in addition to their valence and arousal values (the metadata), can be downloaded [here on Kaggle](https://www.kaggle.com/datasets/imsparsh/deam-mediaeval-dataset-emotional-analysis-in-music/data). The official website for the DEAM dataset can be found [here](https://cvml.unige.ch/databases/DEAM/), however it looks like the links don't work anymore.
+The audio files, in addition to their valence and arousal values (the metadata), can be downloaded [here on Kaggle](https://www.kaggle.com/datasets/imsparsh/deam-mediaeval-dataset-emotional-analysis-in-music/data) and are not included in this repository. The official website for the DEAM dataset can be found [here](https://cvml.unige.ch/databases/DEAM/), however it looks like the links don't work anymore.
 
 For this project, the static annotations averaged per song was used. Specifically, the files `static_annotations_averaged_songs_1_2000.csv` and `static_annotations_averaged_songs_2000_2058.csv` contained all the metadata used to train the AI model.
 
@@ -40,6 +40,52 @@ The csv files created during this project have been included in this repository.
 - `mood.csv`: Contains the song name and mood type of associated with that song based on valence and arousal.
 - `mood_training.csv`: A subset of the songs in `mood.csv` used to train the model. There are 800 songs in this subset (200 for each mood type).
 - `mood_validation.csv`: A susbet of the songs in `mood.csv` (different then the ones in the training set) that is used for validation. There are 65 songs in this subset.
+
+The folder of the data has the following structure: 
+```
+📦data
+ ┣ 📂DEAM_Annotations
+ ┃ ┣ 📂annotations averaged per song
+ ┃ ┃ ┣ 📂dynamic (per second annotations)
+ ┃ ┃ ┃ ┣ 📜arousal.csv
+ ┃ ┃ ┃ ┗ 📜valence.csv
+ ┃ ┃ ┗ 📂song_level
+ ┃ ┃ ┃ ┣ 📜static_annotations_averaged_songs_1_2000.csv
+ ┃ ┃ ┃ ┗ 📜static_annotations_averaged_songs_2000_2058.csv
+ ┃ ┗ 📂annotations per each rater 
+ ┃ ┃ ┣ 📂dynamic (per second annotations)
+ ┃ ┃ ┃ ┣ 📂arousal
+ ┃ ┃ ┃ ┃ ┣ 📜10.csv
+ ┃ ┃ ┃ ┃ ┣ 📜...
+ ┃ ┃ ┃ ┃ ┗ 📜999.csv
+ ┃ ┃ ┗ 📂song_level
+ ┃ ┃ ┃ ┣ 📜static_annotations_songs_1_2000.csv
+ ┃ ┃ ┃ ┗ 📜static_annotations_songs_2000_2058.csv
+ ┣ 📂DEAM_audio
+ ┃ ┗ 📂MEMD_audio
+ ┃ ┃ ┣ 📜10.mp3
+ ┃ ┃ ┣ 📜...
+ ┃ ┃ ┗ 📜999.mp3
+ ┣ 📂features
+ ┃ ┣ 📜10.csv
+ ┃ ┣ 📜...
+ ┃ ┗ 📜999.csv
+ ┣ 📂spectograms
+ ┃ ┣ 📜10.png
+ ┃ ┣ 📜...
+ ┃ ┗ 📜999.png
+ ┣ 📜mood.csv
+ ┣ 📜mood_training.csv
+ ┗ 📜mood_validation.csv
+```
+File tree was created using the VS Code extension [file-tree-generator](https://marketplace.visualstudio.com/items?itemName=Shinotatwu-DS.file-tree-generator).
+
+For reference, the following folders (in addition to the contents in the folders) were not used for this project:
+- *data/DEAM_annotations/annotations averahed per song/dynamic/*
+- *data/DEAM_annotations/annotations per each rater/*
+- *data/features/*
+
+It is important to note that the spectograms are not included in the download for the DEAm dataset. They were generated using the functions in `src/dataset/spectograms.py`.
 
 *Side note: This project uses all songs except 137, 146, 187, 206, 236, 449, 488, 621, 646, 661, 707, 1016, 1109, 1134, 1142, 1161, 1167, 1171, 1184, 1429 as there were issues generating their spectograms.*
 
