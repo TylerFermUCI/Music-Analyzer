@@ -12,6 +12,9 @@ import pandas as pd
 root = pyprojroot.find_root(pyprojroot.has_dir(".git"))
 sys.path.append(str(root))
 
+# When generating the spectograms, some audio files produced black images so exclude those images.
+exclude = [137, 146, 187, 206, 236, 449, 488, 621, 646, 661, 707, 1016, 1109, 1134, 1142, 1161, 1167, 1171, 1184, 1429]
+
 
 def create_csv(data_path: str, new_file_path: str) -> None:
     """
@@ -49,7 +52,6 @@ def create_csv(data_path: str, new_file_path: str) -> None:
                     if arousal < 5: mood = "sad"
                     else: mood = "tense"
                 # Write the information into the new csv file.
-                difference = abs(valence - arousal)
                 writer.writerow([df.iloc[i, 0], mood, valence, arousal])
 
     # If it doesn't, don't do anything.
@@ -114,6 +116,9 @@ def display_csv(csv_file_path: str) -> None:
     if os.path.exists(new_file_path):
         # Open the data into a dataframe.
         df = pd.read_csv(new_file_path)
+
+        # Remove exluded values.
+        for num in exclude: df = df[df.song_id != num]
         print(df)
 
     # If it doesn't, don't do anything.
@@ -140,9 +145,12 @@ def csv_stats(csv_file_path: str) -> None:
     if os.path.exists(new_file_path):
         # Open the data into a dataframe.
         df = pd.read_csv(new_file_path)
-        
+
         # Check for the right header.
         if df.columns.values.tolist() == ['song_id', 'mood', 'valence', 'arousal']:
+            # Remove exluded values.
+            for num in exclude: df = df[df.song_id != num]
+            
             # Seperate data frame by mood.
             df_mood = df.groupby('mood')
 
@@ -152,12 +160,14 @@ def csv_stats(csv_file_path: str) -> None:
             print(f"There are {len(df_mood.get_group('sad'))} sad songs.")
             print(f"There are {len(df_mood.get_group('tense'))} tense songs.")
             print(f"There are {len(df_mood.get_group('calm'))} calm songs.\n")
+            print(f"There are a total of {len(df)} songs.")
         # Incorrect csv file.
         else:
             print(f"CSV file given [{csv_file_path}] does not have all the required headers of ['song_id', 'mood', 'valence', 'arousal'].")
     # If it doesn't, don't do anything.
     else:
         print("File doesn't exist")
+
 
 if __name__ == "__main__":
     csv_path = "data/DEAM_Annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv"

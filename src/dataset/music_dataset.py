@@ -8,11 +8,13 @@ import torch
 import pyprojroot
 import numpy as np
 import pandas as pd
-from pytorch_lightning.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS
 
 # Make it to where paths only need to be from the repo folder.
 root = pyprojroot.find_root(pyprojroot.has_dir(".git"))
 sys.path.append(str(root))
+
+# When generating the spectograms, some audio files produced black images so exclude those images.
+exclude = [137, 146, 187, 206, 236, 449, 488, 621, 646, 661, 707, 1016, 1109, 1134, 1142, 1161, 1167, 1171, 1184, 1429]
 
 
 class MusicDataset(torch.utils.data.Dataset):
@@ -34,6 +36,9 @@ class MusicDataset(torch.utils.data.Dataset):
 
         # Merge root and csv_file_path and read csv file.
         self.df = pd.read_csv(os.path.join(root, csv_file_path))
+
+        # Remove exluded values.
+        for num in exclude: self.df = self.df[self.df.song_id != num]
         
         # One-hot encode the mood for classification.
         self.df = pd.get_dummies(self.df, columns=["mood"])
