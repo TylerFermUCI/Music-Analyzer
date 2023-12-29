@@ -1,5 +1,8 @@
 # Directories
-data
+data/DEAM_Annotations
+data/DEAM_Audio
+data/features
+data/spectograms
 models
 notebooks
 
