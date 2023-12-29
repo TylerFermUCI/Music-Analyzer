@@ -56,7 +56,7 @@ def create_csv(data_path: str, new_file_path: str) -> None:
 
     # If it doesn't, don't do anything.
     else:
-        print("File doesn't exist") 
+        print(f"Data path [{data_path}] doesn't exist") 
     
 
 def create_csv_with_inputs(data_path: str, new_file_path: str) -> None:
@@ -97,7 +97,7 @@ def create_csv_with_inputs(data_path: str, new_file_path: str) -> None:
 
     # If it doesn't, don't do anything.
     else:
-        print("File doesn't exist") 
+        print(f"Data path [{data_path}] doesn't exist") 
 
 
 def display_csv(csv_file_path: str) -> None:
@@ -123,7 +123,7 @@ def display_csv(csv_file_path: str) -> None:
 
     # If it doesn't, don't do anything.
     else:
-        print("File doesn't exist") 
+        print(f"File [{new_file_path}] doesn't exist") 
 
 
 def csv_stats(csv_file_path: str) -> None:
@@ -159,19 +159,91 @@ def csv_stats(csv_file_path: str) -> None:
             print(f"There are {len(df_mood.get_group('happy'))} happy songs.")
             print(f"There are {len(df_mood.get_group('sad'))} sad songs.")
             print(f"There are {len(df_mood.get_group('tense'))} tense songs.")
-            print(f"There are {len(df_mood.get_group('calm'))} calm songs.\n")
-            print(f"There are a total of {len(df)} songs.")
+            print(f"There are {len(df_mood.get_group('calm'))} calm songs.")
+            print(f"There are a total of {len(df)} songs.\n")
+            print(f"Number of songs excluded: {len(exclude)}")
         # Incorrect csv file.
         else:
             print(f"CSV file given [{csv_file_path}] does not have all the required headers of ['song_id', 'mood', 'valence', 'arousal'].")
     # If it doesn't, don't do anything.
     else:
-        print("File doesn't exist")
+        print(f"File [{new_file_path}] doesn't exist")
 
+
+    
+def train_val_split(csv_file_path: str):
+    """
+    Create csv files that seperates images into training set and validation set.
+    
+    Arguments:
+        csv_file_path (str): path to the csv file that contains all images and associated labels.
+    
+    Return value: None
+    """
+    # Merge csv_file_path with root.
+    new_file_path = os.path.join(root, csv_file_path)
+    
+    # Check if path exists.
+    if os.path.exists(new_file_path):
+        # Open the data into a dataframe.
+        df = pd.read_csv(new_file_path)
+
+        # Remove exluded values.
+        for num in exclude: df = df[df.song_id != num]
+
+        # Seperate df by mood type.
+        happy_df = df[df.mood == "happy"]
+        sad_df = df[df.mood == "sad"]
+        calm_df = df[df.mood == "calm"]
+        tense_df = df[df.mood == "tense"]
+        
+        sampled_happy = happy_df.sample(n=200)
+        extra_happy = happy_df[~happy_df.apply(tuple,1).isin(sampled_happy.apply(tuple,1))]
+
+        sampled_sad = sad_df.sample(n=200)
+        extra_sad = sad_df[~sad_df.apply(tuple,1).isin(sampled_sad.apply(tuple,1))]
+
+        sampled_calm = calm_df.sample(n=200)
+        extra_calm = calm_df[~calm_df.apply(tuple,1).isin(sampled_calm.apply(tuple,1))]
+        
+        sampled_tense = tense_df.sample(n=200)
+        extra_tense = tense_df[~tense_df.apply(tuple,1).isin(sampled_tense.apply(tuple,1))]
+        
+        # Establish base path.
+        base_path = os.path.split(new_file_path)[0]
+        
+        # Combine sampled dataframes for training.
+        training_frames = [sampled_happy, sampled_sad, sampled_calm, sampled_tense]
+        sampled_combined = pd.concat(training_frames).sort_values("song_id")
+        
+        # Create training set csv file.  
+        training_csv_path = os.path.join(base_path, "mood_training.csv")
+        sampled_combined.to_csv(training_csv_path, index=False)
+        print(f"Created training csv file at [{training_csv_path}]")
+
+        # Get samples of validation data from the extra songs not included in training.
+        min_n = min(len(extra_happy), len(extra_calm), len(extra_sad), len(extra_tense))
+        val_happy = extra_happy.sample(n=min_n)
+        val_sad = extra_sad.sample(n=min_n)
+        val_calm = extra_calm.sample(n=min_n)
+        val_tense = extra_tense.sample(n=min_n)
+        
+        # Combine sampled dataframes for validation.
+        val_frames = [val_calm, val_happy, val_sad, val_tense]
+        val_combined = pd.concat(val_frames).sort_values("song_id")
+
+        # Create validation set csv file.  
+        val_csv_path = os.path.join(base_path, "mood_validation.csv")
+        val_combined.to_csv(val_csv_path, index=False)
+        print(f"Created validation csv file at [{val_csv_path}]")
+    # If it doesn't, don't do anything.
+    else:
+        print(f"File [{new_file_path}] doesn't exist")
 
 if __name__ == "__main__":
     csv_path = "data/DEAM_Annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv"
     new_csv_path = "data/mood.csv"
     # display_csv(csv_path)
     # create_csv(csv_path, new_csv_path)
-    csv_stats(new_csv_path)
+    # csv_stats(new_csv_path)
+    train_val_split(new_csv_path)
