@@ -7,7 +7,8 @@ Creates an AI model using ResNet that will be able to detect various moods of so
 - **Valence**: being positive or negative. High valence is positive, low valence is negative.
 - **Arousal**: emotionally stimulating or active.
 
-[Source - Royal Society Publishing](https://royalsocietypublishing.org/doi/10.1098/rsbl.2012.0374)
+*Blumstein Daniel T., Bryant Gregory A. and Kaye Peter 2012 The sound of arousal in music is context-dependent Biol. Lett. 8744–747
+http://doi.org/10.1098/rsbl.2012.0374*
 
 ## Valence and Arousal Mood Type Table:
 
