@@ -6,7 +6,6 @@ import os
 import sys
 import pyprojroot
 import pytorch_lightning as pl
-from torchvision import transforms
 from torch.utils.data import DataLoader
 from pytorch_lightning.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS
 
@@ -94,10 +93,12 @@ class MusicDataModule(pl.LightningDataModule):
 
 if __name__ == "__main__":
     # Create Paths (without root) to specific locations. 
-    train_csv_file = "data/mood.csv"
+    train_csv_file = "data/mood_training.csv"
     train_dir = "data/spectograms"
-    validation_csv_file = "data/mood.csv"
+    
+    validation_csv_file = "data/mood_validation.csv"
     validation_dir = "data/spectograms"
+    
     test_csv_file = "data/mood.csv"
     test_dir = "data/spectograms"
 
