@@ -171,7 +171,7 @@ def csv_stats(csv_file_path: str) -> None:
 
 
     
-def train_val_split(csv_file_path: str):
+def train_val_split(csv_file_path: str) -> None:
     """
     Create csv files that seperates images into training set and validation set.
     
@@ -245,5 +245,5 @@ if __name__ == "__main__":
     new_csv_path = "data/mood.csv"
     # display_csv(csv_path)
     # create_csv(csv_path, new_csv_path)
-    # csv_stats(new_csv_path)
-    train_val_split(new_csv_path)
+    csv_stats(new_csv_path)
+    # train_val_split(new_csv_path)

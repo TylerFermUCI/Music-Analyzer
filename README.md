@@ -87,13 +87,13 @@ For reference, the following folders (in addition to the contents in the folders
 
 It is important to note that the spectograms are not included in the download for the DEAm dataset. They were generated using the functions in `src/dataset/spectograms.py`.
 
-*Side note: This project uses all songs except 137, 146, 187, 206, 236, 449, 488, 621, 646, 661, 707, 1016, 1109, 1134, 1142, 1161, 1167, 1171, 1184, 1429 as there were issues generating their spectograms.*
-
+*Side note: This project uses all songs except 137, 146, 187, 206, 236, 449, 488, 621, 646, 661, 707, 1016, 1109, 1134, 1142, 1161, 1167, 1171, 1184, 1429 as there were issues generating their spectograms. This list is definied in both `data_utils.py` and `music_dataset.py`*
 
 
 ## Notes:
 
 - All file paths written don't include the root. The root is added in each function as it is needed. For writing file paths, the only necessary parts is everything after the folder Music-Analyzer.
+- For the purposes of this project, tense and energetic can be used interchangeably.
 
 
 ## References:

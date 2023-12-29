@@ -84,6 +84,6 @@ if __name__ == "__main__":
 
     dataset = MusicDataset(csv_file_path=csv_path, data_dir=data_dir)
 
-    print(dataset.__len__())
-    print(dataset.__getitem__(0))
+    print(len(dataset))
+    print(dataset[0])
     dataset.print_df()

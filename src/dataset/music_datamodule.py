@@ -103,15 +103,15 @@ if __name__ == "__main__":
     test_dir = "data/spectograms"
 
     # Create a music data module to deal with data loaders for model.
-    bps_dm = MusicDataModule(train_csv_file=train_csv_file,
+    music_dm = MusicDataModule(train_csv_file=train_csv_file,
                             train_dir=train_dir,
                             val_csv_file=validation_csv_file,
                             val_dir=validation_dir,
                             test_csv_file=test_csv_file,
                             test_dir=test_dir
                             )
-    bps_dm.setup(stage='train')
+    music_dm.setup(stage='train')
 
-    for batch_idx, (image, label) in enumerate(bps_dm.train_dataloader()):
+    for batch_idx, (image, label) in enumerate(music_dm.train_dataloader()):
         print(batch_idx, image.shape, label)
         break
