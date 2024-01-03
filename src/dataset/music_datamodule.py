@@ -7,13 +7,14 @@ import sys
 import pyprojroot
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
+import torchvision.transforms as transforms
 from pytorch_lightning.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS
-
-from music_dataset import MusicDataset
 
 # Make it to where paths only need to be from the repo folder.
 root = pyprojroot.find_root(pyprojroot.has_dir(".git"))
 sys.path.append(str(root))
+
+from src.dataset.music_dataset import MusicDataset
 
  
 class MusicDataModule(pl.LightningDataModule):
@@ -24,6 +25,7 @@ class MusicDataModule(pl.LightningDataModule):
                  val_dir: str,
                  test_csv_file: str,
                  test_dir: str,
+                 transforms,
                  batch_size: int = 4,
                  num_workers: int = 1):
         """
@@ -36,6 +38,7 @@ class MusicDataModule(pl.LightningDataModule):
             val_dir (str): The directory where the validation data is stored.
             test_csv_file (str): The name of the csv file containing the test data.
             test_dir (str): The directory where the test data is stored.
+            transforms: Transforms to apply to the images.
             batch_size (int): The batch size to use for the DataLoader.
             num_workers (int): The number of workers to use for the DataLoader.
         """
@@ -48,6 +51,7 @@ class MusicDataModule(pl.LightningDataModule):
         self.test_dir = os.path.join(root, test_dir)
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.transforms = transforms
     
         
     def setup(self, stage: str) -> None:
@@ -57,38 +61,41 @@ class MusicDataModule(pl.LightningDataModule):
         if stage == "train":
             # Create the MusicDataset object for the training data.
             self.train_MusicDataset = MusicDataset(csv_file_path = self.train_csv,
-                                                        data_dir = self.train_dir)
+                                                   data_dir = self.train_dir,
+                                                   transforms= self.transforms)
 
         if stage == "validate":
             # Create the MusicDataset object for the validation data.
             self.validate_MusicDataset = MusicDataset(csv_file_path = self.val_csv,
-                                                            data_dir = self.val_dir)
+                                                      data_dir = self.val_dir,
+                                                      transforms= self.transforms)
             
         if stage == "test":
             # Create the MusicDataset object for the test data.
             self.test_MusicDataset = MusicDataset(csv_file_path = self.test_csv,
-                                                        data_dir = self.test_dir)
+                                                  data_dir = self.test_dir,
+                                                  transforms= self.transforms)
 
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         """
         Returns the training dataloader.
         """
-        return DataLoader(self.train_MusicDataset, batch_size=self.batch_size, num_workers=self.num_workers)
+        return DataLoader(self.train_MusicDataset, batch_size=self.batch_size, num_workers=self.num_workers, persistent_workers=True)
     
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
         """
         Returns the validation dataloader.
         """
-        return DataLoader(self.validate_MusicDataset, batch_size=self.batch_size, num_workers=self.num_workers)
+        return DataLoader(self.validate_MusicDataset, batch_size=self.batch_size, num_workers=self.num_workers, persistent_workers=True)
     
 
     def test_dataloader(self) -> EVAL_DATALOADERS:
         """
         Returns the test dataloader.
         """
-        return DataLoader(self.test_MusicDataset, batch_size=self.batch_size, num_workers=self.num_workers)
+        return DataLoader(self.test_MusicDataset, batch_size=self.batch_size, num_workers=self.num_workers, persistent_workers=True)
 
 
 if __name__ == "__main__":
@@ -108,8 +115,8 @@ if __name__ == "__main__":
                             val_csv_file=validation_csv_file,
                             val_dir=validation_dir,
                             test_csv_file=test_csv_file,
-                            test_dir=test_dir
-                            )
+                            test_dir=test_dir,
+                            transforms = transforms.Compose([transforms.ToTensor()]))
     music_dm.setup(stage='train')
 
     for batch_idx, (image, label) in enumerate(music_dm.train_dataloader()):
