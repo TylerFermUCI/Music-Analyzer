@@ -8,6 +8,8 @@ import torch
 import pyprojroot
 import numpy as np
 import pandas as pd
+import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
 
 # Make it to where paths only need to be from the repo folder.
 root = pyprojroot.find_root(pyprojroot.has_dir(".git"))
@@ -26,7 +28,7 @@ class MusicDataset(torch.utils.data.Dataset):
         data_dir (str): directory where the data associated with the csv file is stored.
     """
 
-    def __init__(self, csv_file_path: str, data_dir: str) -> None:
+    def __init__(self, csv_file_path: str, data_dir: str, transforms) -> None:
         """
         Constructor for MusicDataset class.
         """    
@@ -37,8 +39,14 @@ class MusicDataset(torch.utils.data.Dataset):
         # Merge root and csv_file_path and read csv file.
         self.df = pd.read_csv(os.path.join(root, csv_file_path))
 
+        # Save transforms.
+        self.transforms = transforms
+        
         # Remove exluded values.
         for num in exclude: self.df = self.df[self.df.song_id != num]
+
+        # One-hot encode the mood type for classification task.
+        self.df = pd.get_dummies(self.df, columns=["mood"])
     
 
     def print_df(self) -> None:
@@ -58,7 +66,7 @@ class MusicDataset(torch.utils.data.Dataset):
         return len(self.df)
 
 
-    def __getitem__(self, idx) -> (torch.Tensor, str):
+    def __getitem__(self, idx) -> (torch.Tensor, torch.Tensor):
         """
         Fetches the image and corresponding label for a given index.
 
@@ -71,10 +79,41 @@ class MusicDataset(torch.utils.data.Dataset):
         row = self.df.iloc[idx]
         img_fname = row["song_id"]
         img_file_path = os.path.join(self.data_dir, f"{img_fname}.png")
-        img = cv2.imread(img_file_path, cv2.IMREAD_ANYDEPTH)
+        img = self.transforms(cv2.imread(img_file_path, cv2.IMREAD_COLOR))
+
+        # Fetch one hot encoded labels for all classes of mood type as a Series
+        mood_type_tensor = row[['mood_calm', 'mood_happy', 'mood_sad', 'mood_tense']]
+
+        # Convert Series to numpy array
+        mood_type_tensor = mood_type_tensor.to_numpy().astype(np.bool_)
+        
+        # Convert One Hot Encoded labels to tensor
+        mood_type_tensor = torch.from_numpy(mood_type_tensor)
+        
+        # Convert tensor data type to Float
+        moood_type_tensor = mood_type_tensor.type(torch.FloatTensor)
         
         # Return the image and associated mood type label.
-        return torch.from_numpy(img), row["mood"]
+        return img, moood_type_tensor
+
+# Augmentation for transforms.
+class Resize(object):
+    def __init__(self, resize_height: int, resize_width:int):
+        self.resize_height = resize_height
+        self.resize_width = resize_width
+    
+    def __call__(self, img:np.ndarray) -> np.ndarray:
+        """
+        Resize the image to the specified width and height.
+        
+        Arguments:
+            img (np.ndarray): image to be resized.
+        Return value: torch.Tensor of resized image.
+        """
+        img_resized = cv2.resize(img,
+                                 (self.resize_width, self.resize_height),
+                                 interpolation = cv2.INTER_LINEAR)
+        return img_resized
 
 
 if __name__ == "__main__":
@@ -82,8 +121,15 @@ if __name__ == "__main__":
     csv_path = "data/mood.csv"
     data_dir = "data/spectograms"
 
-    dataset = MusicDataset(csv_file_path=csv_path, data_dir=data_dir)
+    dataset = MusicDataset(csv_file_path=csv_path,
+                           data_dir=data_dir,
+                           transforms = transforms.Compose(
+                               [Resize(120, 120),
+                                transforms.ToTensor()]))
 
     print(len(dataset))
-    print(dataset[0])
+    img, label = dataset[0]
+    print(img)
+    print("Image shape:", img.shape)
+    print("Label:", label)
     dataset.print_df()
